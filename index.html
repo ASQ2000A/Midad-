@@ -1,26 +1,1924 @@
-const ar={dashboard:'الرئيسية',cases:'القضايا',documents:'المستندات',timeline:'التسلسل الزمني',portal:'بوابة العملاء',directory:'دليل المحامين',feedback:'ملاحظاتك',lawyer:'محامٍ',client:'عميل',validation:'نسخة التحقق من الفكرة',loginTitle:'مساحة عمل قانونية<br>تُشبه طريقة عملك.',loginSub:'جرّب رحلة مِداد كاملة ببيانات آمنة ومُحاكية للواقع.',demoNotice:'هذه بيئة تجريبية فقط — لا تستخدم بيانات حقيقية.',enterDemo:'دخول التجربة',loginFooter:'بالدخول، أنت توافق على أن هذه تجربة استكشافية وليست خدمة قانونية.',demoMode:'وضع التجربة',reset:'إعادة ضبط التجربة',logout:'تسجيل الخروج',quote:'حين تكون كل التفاصيل في موضعها، يصبح القرار أوضح.'};
-const en={dashboard:'Overview',cases:'Matters',documents:'Documents',timeline:'Timeline',portal:'Client portal',directory:'Lawyer directory',feedback:'Your feedback',lawyer:'Lawyer',client:'Client',validation:'VALIDATION EDITION',loginTitle:'Legal work, organised<br>around how you work.',loginSub:'Explore the Midad journey with safe, realistic demo data.',demoNotice:'This is a demo environment — never enter real data.',enterDemo:'Enter demo',loginFooter:'By entering, you acknowledge this is an exploratory experience, not a legal service.',demoMode:'DEMO MODE',reset:'Reset demo',logout:'Log out',quote:'When every detail has a place, the decision becomes clearer.'};
-const cases=[{id:'MD-2026-041',name:'شركة الآفاق ضد شركة مدار',client:'شركة الآفاق التجارية',type:'نزاع تجاري',status:'قيد المراجعة',class:'gold',progress:68,next:'جلسة تحضيرية — 04 ديسمبر'},{id:'MD-2026-037',name:'طلب تسوية عقد توريد',client:'شركة النور للحلول',type:'عقود تجارية',status:'نشطة',class:'green',progress:42,next:'مراجعة المسودة — 28 نوفمبر'},{id:'MD-2026-029',name:'علامة «وِفاق» التجارية',client:'مؤسسة وِفاق',type:'ملكية فكرية',status:'بانتظار العميل',class:'gray',progress:85,next:'اعتماد المستندات — 25 نوفمبر'}];
-const lawyers=[['نورة السالم','استشارات ونزاعات تجارية','12','4.9','ن'],['مشاعل الرشيد','الملكية الفكرية والتقنية','8','4.8','م'],['عبدالرحمن حمدان','العقود والحوكمة','15','4.9','ع'],['لينا العمري','العمل والموارد البشرية','10','4.7','ل'],['سارة الحربي','الشركات الناشئة والاستثمار','7','4.8','س'],['عمر القصيبي','العقار والإنشاءات','18','4.6','ع']];
-let state={lang:localStorage.getItem('midad-lang')||'ar',role:'lawyer',page:'dashboard',rating:0,feedbacks:JSON.parse(localStorage.getItem('midad-feedbacks')||'[]')};
-const $=s=>document.querySelector(s);const t=k=>(state.lang==='ar'?ar:en)[k]||k;const isAr=()=>state.lang==='ar';
-function applyLang(){document.documentElement.lang=state.lang;document.documentElement.dir=isAr()?'rtl':'ltr';document.querySelectorAll('[data-i18n]').forEach(e=>e.innerHTML=t(e.dataset.i18n));$('#langLogin').textContent=isAr()?'English':'العربية';$('#languageToggle').textContent=isAr()?'English':'العربية';$('#langApp').textContent=isAr()?'EN':'ع';}
-function toast(msg){const el=$('#toast');el.textContent=msg;el.classList.add('show');setTimeout(()=>el.classList.remove('show'),2800)}
-function nav(){const items=[['dashboard','⌂'],['cases','▣'],['documents','▤'],['timeline','◷'],['portal','↗'],['directory','◎'],['feedback','✦']];$('#nav').innerHTML=items.map(([p,i])=>`<button class="nav-item ${state.page===p?'active':''}" data-page="${p}"><span class="nav-icon">${i}</span>${t(p)}</button>`).join('');document.querySelectorAll('[data-page]').forEach(b=>b.onclick=()=>{state.page=b.dataset.page;render();$('.sidebar').classList.remove('open')})}
-function layout(title,crumb,body,actions=''){ $('#pageTitle').textContent=title;$('#crumb').textContent=crumb;$('#content').innerHTML=actions+body; }
-function dashboard(){layout(t('dashboard'),isAr()?'مساحة العمل':'Workspace',`<p class="welcome">${isAr()?'مرحباً نورة، هذه نظرة سريعة على ما يحتاج انتباهك اليوم.':'Welcome back, Noura. Here is what needs your attention today.'}</p><div class="dashboard-grid"><section class="case-hero"><span class="label">${isAr()?'القضية النشطة':'ACTIVE MATTER'}</span><h3>شركة الآفاق ضد شركة مدار</h3><div class="case-meta"><span>${isAr()?'نزاع تجاري':'Commercial dispute'}</span><span><b>04 Dec</b> ${isAr()?'الجلسة القادمة':'next hearing'}</span></div><div class="progress" style="margin-top:18px"><span style="width:68%"></span></div></section><section class="card"><div class="card-head"><h3>${isAr()?'النشاط الأخير':'Recent activity'}</h3><button class="link-btn" data-page-go="timeline">${isAr()?'عرض الكل':'View all'}</button></div><div class="activity"><div class="activity-item"><div class="activity-dot">↥</div><p>${isAr()?'أضافت رنا المستند «عرض الأسعار النهائي»':'Rana added “Final quotation”'}<br><time>${isAr()?'منذ ساعتين':'2 hours ago'}</time></p></div><div class="activity-item"><div class="activity-dot">✓</div><p>${isAr()?'تمت مراجعة مسودة مذكرة الرد':'Response brief draft reviewed'}<br><time>${isAr()?'أمس':'Yesterday'}</time></p></div></div></section><section class="card"><h3>${isAr()?'لمحة عن العمل':'Work at a glance'}</h3><div class="stat-row"><div class="stat"><b>03</b><span>${isAr()?'قضايا نشطة':'Active matters'}</span></div><div class="stat"><b>07</b><span>${isAr()?'مستندات جديدة':'New documents'}</span></div><div class="stat"><b>02</b><span>${isAr()?'مهام اليوم':'Tasks today'}</span></div></div></section><section class="card"><div class="card-head"><h3>${isAr()?'خطوتك التالية':'Your next move'}</h3></div><p class="muted" style="font-size:11px">${isAr()?'راجع التسلسل الزمني للقضية قبل الجلسة التحضيرية.':'Review the matter timeline before the preliminary hearing.'}</p><button class="primary" data-page-go="timeline">${isAr()?'فتح التسلسل':'Open timeline'}</button></section><section class="card journey"><div class="card-head"><h3>${isAr()?'رحلة القضية':'Matter journey'}</h3><span class="badge gold">${isAr()?'قيد المراجعة':'In review'}</span></div><div class="journey-steps"><div class="step done"><i>✓</i>${isAr()?'استلام':'Intake'}</div><div class="step done"><i>✓</i>${isAr()?'تحليل':'Analysis'}</div><div class="step now"><i>3</i>${isAr()?'تحضير':'Preparation'}</div><div class="step"><i>4</i>${isAr()?'جلسات':'Hearings'}</div><div class="step"><i>5</i>${isAr()?'إغلاق':'Close'}</div></div></section></div>`)}
-function casesPage(){layout(t('cases'),isAr()?'مساحة العمل / القضايا':'Workspace / Matters',`<div class="filterbar"><input id="caseSearch" class="search" placeholder="${isAr()?'ابحث باسم القضية أو العميل...':'Search matter or client...'}"><select id="caseFilter" class="select"><option value="all">${isAr()?'كل الحالات':'All statuses'}</option><option value="نشطة">${isAr()?'نشطة':'Active'}</option><option value="قيد المراجعة">${isAr()?'قيد المراجعة':'In review'}</option></select></div><div class="card table-wrap"><table class="table"><thead><tr><th>${isAr()?'القضية':'MATTER'}</th><th>${isAr()?'العميل':'CLIENT'}</th><th>${isAr()?'التقدم':'PROGRESS'}</th><th>${isAr()?'الخطوة التالية':'NEXT STEP'}</th><th>${isAr()?'الحالة':'STATUS'}</th><th></th></tr></thead><tbody id="caseRows"></tbody></table></div>`,`<div class="section-actions" style="justify-content:flex-end;margin-bottom:16px"><button class="primary" id="newCase">+ ${isAr()?'قضية جديدة':'New matter'}</button></div>`);renderCases(cases);$('#caseSearch').oninput=e=>filterCases(e.target.value);$('#caseFilter').onchange=()=>filterCases($('#caseSearch').value);$('#newCase').onclick=newCaseModal}
-function renderCases(data){$('#caseRows').innerHTML=data.map(c=>`<tr><td><span class="case-name">${c.name}</span><span class="case-ref">${c.id} · ${c.type}</span></td><td>${c.client}</td><td><div class="progress-line"><div class="progress"><span style="width:${c.progress}%"></span></div><span>${c.progress}%</span></div></td><td>${c.next}</td><td><span class="badge ${c.class}">${c.status}</span></td><td><button class="action-menu" data-open-case="${c.id}">···</button></td></tr>`).join('');document.querySelectorAll('[data-open-case]').forEach(b=>b.onclick=()=>{state.page='timeline';render()})}
-function filterCases(q){q=q.toLowerCase();const f=$('#caseFilter').value;renderCases(cases.filter(c=>(c.name+c.client).toLowerCase().includes(q)&&(f==='all'||c.status===f)))}
-function documents(){layout(t('documents'),isAr()?'القضايا / شركة الآفاق ضد شركة مدار':'Matters / Al-Aفاق vs Madar',`<div class="upload-zone" id="uploadZone">↑<br><b>${isAr()?'اسحب ملفاً هنا أو اختر من جهازك':'Drop a file here or choose from your device'}</b><br><small>${isAr()?'تُحاكي هذه التجربة رفع الملفات ولا تحفظ أي بيانات.':'This demo simulates upload and stores no sensitive data.'}</small></div><div class="filterbar"><input class="search" id="docSearch" placeholder="${isAr()?'ابحث في المستندات...':'Search documents...'}"><select class="select"><option>${isAr()?'كل التصنيفات':'All categories'}</option><option>${isAr()?'عقود':'Contracts'}</option><option>${isAr()?'مراسلات':'Correspondence'}</option></select></div><div id="docGrid" class="doc-grid"></div>`);const docs=[['عقد التوريد الأساسي','PDF','عقود','2.4 MB'],['مذكرة الوقائع','DOCX','مذكرات','836 KB'],['عرض الأسعار النهائي','PDF','مراسلات','1.2 MB'],['محضر اجتماع 12 نوفمبر','PDF','محاضر','540 KB'],['سجل المراسلات','XLSX','أدلة','1.8 MB'],['مسودة مذكرة الرد','DOCX','مذكرات','690 KB']];function draw(ds){$('#docGrid').innerHTML=ds.map(d=>`<article class="doc"><span class="doc-type">${d[1]}</span><h4>${d[0]}</h4><small>${d[2]} · ${d[3]}</small></article>`).join('')}draw(docs);$('#docSearch').oninput=e=>draw(docs.filter(d=>d[0].includes(e.target.value)));$('#uploadZone').onclick=()=>toast(isAr()?'تمت محاكاة رفع المستند بنجاح.':'Document upload simulated successfully.')}
-function timeline(){layout(t('timeline'),isAr()?'القضايا / شركة الآفاق ضد شركة مدار':'Matters / Al-Aفاق vs Madar',`<div class="card"><div class="card-head"><div><h3>شركة الآفاق ضد شركة مدار</h3><p class="case-ref">MD-2026-041 · ${isAr()?'نزاع تجاري':'Commercial dispute'}</p></div><button class="primary" id="addEvent">+ ${isAr()?'إضافة حدث':'Add event'}</button></div><div class="timeline"><article class="timeline-item"><i class="timeline-point gold"></i><div><h4>${isAr()?'جلسة تحضيرية قادمة':'Preliminary hearing scheduled'}</h4><p>${isAr()?'جلسة عن بُعد لمناقشة نطاق النزاع والمستندات المطلوبة.':'Remote hearing to discuss scope and requested documents.'}</p></div><time class="timeline-date">04 DEC 2026</time></article><article class="timeline-item"><i class="timeline-point"></i><div><h4>${isAr()?'تمت مراجعة مسودة مذكرة الرد':'Response brief draft reviewed'}</h4><p>${isAr()?'تمت إضافة ملاحظات داخلية وإرسال الطلب لاعتماد العميل.':'Internal comments added; approval requested from client.'}</p></div><time class="timeline-date">18 NOV 2026</time></article><article class="timeline-item"><i class="timeline-point"></i><div><h4>${isAr()?'استلام عرض الأسعار النهائي':'Final quotation received'}</h4><p>${isAr()?'أضافت رنا المستند عبر بوابة العميل.':'Rana added the document through the client portal.'}</p></div><time class="timeline-date">16 NOV 2026</time></article><article class="timeline-item"><i class="timeline-point gray"></i><div><h4>${isAr()?'افتتاح القضية':'Matter opened'}</h4><p>${isAr()?'تم إنشاء مساحة العمل وتحديد فريق القضية.':'Workspace created and matter team assigned.'}</p></div><time class="timeline-date">08 NOV 2026</time></article></div></div>`);$('#addEvent').onclick=()=>eventModal()}
-function portal(){layout(t('portal'),isAr()?'التواصل / بوابة العملاء':'Communication / Client portal',`<div class="portal-banner"><div><b>${isAr()?'بوابة عميل آمنة وبسيطة':'A simple, secure client portal'}</b><p>${isAr()?'شارك رابطاً تجريبياً يتيح للعميل متابعة التقدم وإضافة المستندات.':'Share a demo link for clients to follow progress and add documents.'}</p></div><button class="copy-link" id="copyPortal">${isAr()?'نسخ رابط التجربة':'Copy demo link'}</button></div><div class="dashboard-grid"><section class="card"><div class="card-head"><h3>${isAr()?'ما يراه العميل':'What the client sees'}</h3><span class="badge green">${isAr()?'نشط':'Active'}</span></div><div class="case-hero"><span class="label">MD-2026-041</span><h3>شركة الآفاق ضد شركة مدار</h3><div class="case-meta"><span>${isAr()?'آخر تحديث: اليوم':'Last update: today'}</span></div></div><div class="activity" style="margin-top:20px"><div class="activity-item"><div class="activity-dot">✓</div><p>${isAr()?'تمت مراجعة مسودة مذكرة الرد':'Response brief draft reviewed'}</p></div><div class="activity-item"><div class="activity-dot">↥</div><p>${isAr()?'نحتاج منك اعتماد مسودة المذكرة':'Your approval is needed on the brief draft'}</p></div></div></section><section class="card"><h3>${isAr()?'دعوة العميل':'Client invitation'}</h3><p class="muted" style="font-size:11px">${isAr()?'رنا الهادي — عميل تجريبي':'Rana Al-Hadi — demo client'}</p><div class="field"><label>${isAr()?'البريد الإلكتروني':'Email'}</label><input value="rana@midad.demo" readonly></div><button class="primary full" id="inviteBtn">${isAr()?'إرسال دعوة تجريبية':'Send demo invitation'}</button></section></div>`);$('#copyPortal').onclick=()=>{navigator.clipboard?.writeText('https://demo.midad.app/portal/MD-2026-041');toast(isAr()?'تم نسخ رابط تجريبي.':'Demo link copied.')};$('#inviteBtn').onclick=()=>toast(isAr()?'أُرسلت الدعوة بشكل تجريبي.':'Demo invitation sent.')}
-function directory(){layout(t('directory'),isAr()?'اكتشف / دليل المحامين':'Discover / Lawyer directory',`<p class="welcome">${isAr()?'ملفات مهنية تجريبية تساعدك على تصور شبكة مِداد المستقبلية.':'Demo professional profiles to help imagine the future Midad network.'}</p><div class="filterbar"><input class="search" id="lawyerSearch" placeholder="${isAr()?'ابحث بالاسم أو التخصص...':'Search by name or specialty...'}"><select class="select"><option>${isAr()?'كل التخصصات':'All practices'}</option><option>${isAr()?'تجاري':'Commercial'}</option><option>${isAr()?'تقنية':'Technology'}</option></select></div><div id="lawyerGrid" class="lawyer-grid"></div>`);function draw(ls){$('#lawyerGrid').innerHTML=ls.map((l,i)=>`<article class="lawyer-card"><div class="profile-head"><span class="avatar ${i%2?'sand':'navy'}">${l[4]}</span><div><h3>${l[0]}</h3><p>${l[1]}</p></div></div><div class="stars">★★★★★ <span style="color:var(--muted);font-size:10px">${l[3]}</span></div><div class="profile-stats"><span><b>${l[2]}</b>${isAr()?'سنة خبرة':'years'}</span><span><b>${18+i*7}</b>${isAr()?'تقييم':'reviews'}</span><button class="link-btn" data-lawyer="${i}">${isAr()?'عرض الملف':'View profile'}</button></div></article>`).join('');document.querySelectorAll('[data-lawyer]').forEach(b=>b.onclick=()=>profileModal(lawyers[b.dataset.lawyer]))}draw(lawyers);$('#lawyerSearch').oninput=e=>draw(lawyers.filter(l=>(l[0]+l[1]).includes(e.target.value)))}
-function feedback(){layout(t('feedback'),isAr()?'المساعدة / ملاحظاتك':'Help / Your feedback',`<div class="feedback-layout"><section class="card"><h3>${isAr()?'كيف كانت تجربة مِداد؟':'How was your Midad experience?'}</h3><p class="muted" style="font-size:11px">${isAr()?'رأيك سيشكل ما نبنيه لاحقاً. لا تُدرج معلومات حساسة أو خاصة.':'Your perspective shapes what we build next. Please do not include sensitive information.'}</p><div class="field"><label>${isAr()?'تقييمك العام':'Overall rating'}</label><div id="rating" class="rating-select">${[1,2,3,4,5].map(n=>`<button data-rate="${n}" class="${state.rating>=n?'selected':''}">★</button>`).join('')}</div></div><div class="field"><label>${isAr()?'ما الذي كان مفيداً؟ وما الذي تود تغييره؟':'What felt useful? What would you change?'}</label><textarea id="feedbackText" placeholder="${isAr()?'اكتب ملاحظاتك هنا...':'Write your thoughts here...'}"></textarea></div><button class="primary" id="submitFeedback">${isAr()?'إرسال الملاحظات':'Send feedback'}</button></section><aside class="card"><h3>${isAr()?'دليل سريع للتجربة':'Quick exploration guide'}</h3><ol class="guide-list"><li>${isAr()?'ابدأ بلوحة التحكم وتعرّف على القضية النشطة.':'Start at the overview and inspect the active matter.'}</li><li>${isAr()?'افتح التسلسل الزمني لترى سياق القرارات.':'Open the timeline to see decision context.'}</li><li>${isAr()?'جرّب بوابة العميل من منظور التواصل.':'Try the client portal communication flow.'}</li><li>${isAr()?'استكشف دليل المحامين والملفات المهنية.':'Explore the directory and profiles.'}</li></ol><div class="demo-notice">✦ ${isAr()?'يمكنك إعادة ضبط التجربة في أي وقت من القائمة.':'You can reset the demo anytime from the menu.'}</div></aside></div>`);document.querySelectorAll('[data-rate]').forEach(b=>b.onclick=()=>{state.rating=+b.dataset.rate;feedback()});$('#submitFeedback').onclick=()=>{const text=$('#feedbackText').value.trim();if(!state.rating&&!text)return toast(isAr()?'أضف تقييماً أو ملاحظة أولاً.':'Please add a rating or note first.');state.feedbacks.push({rating:state.rating,text,date:new Date().toISOString()});localStorage.setItem('midad-feedbacks',JSON.stringify(state.feedbacks));state.rating=0;toast(isAr()?'شكراً — تم حفظ ملاحظتك في هذه التجربة.':'Thank you — your feedback was saved in this demo.');feedback()}}
-function profileModal(l){openModal(`<h3>${l[0]}</h3><p>${l[1]} · ${l[2]} ${isAr()?'سنة من الخبرة':'years of experience'}</p><div class="stars">★★★★★ ${l[3]}</div><p>${isAr()?'ملف مهني تجريبي يعرض كيف يستطيع العملاء استكشاف الخبرات والمجالات القانونية ضمن مِداد.':'A demo professional profile showing how clients can explore expertise and legal practices in Midad.'}</p><button class="primary full" id="contactLawyer">${isAr()?'طلب تواصل تجريبي':'Request a demo contact'}</button>`);$('#contactLawyer').onclick=()=>{closeModal();toast(isAr()?'تم تسجيل اهتمامك بشكل تجريبي.':'Your demo interest was recorded.')}}
-function newCaseModal(){openModal(`<h3>${isAr()?'إنشاء قضية تجريبية':'Create demo matter'}</h3><p>${isAr()?'أضف قضية افتراضية لترى كيف تظهر ضمن مساحة العمل.':'Add a fictional matter to see how it appears in the workspace.'}</p><div class="field"><label>${isAr()?'اسم القضية':'Matter name'}</label><input id="newCaseName" placeholder="${isAr()?'مثال: عقد شراكة افتراضي':'Example: Fictional partnership agreement'}"></div><div class="field"><label>${isAr()?'اسم العميل':'Client name'}</label><input id="newClientName" placeholder="${isAr()?'شركة تجريبية':'Demo company'}"></div><button class="primary full" id="saveCase">${isAr()?'إنشاء القضية':'Create matter'}</button>`);$('#saveCase').onclick=()=>{const name=$('#newCaseName').value.trim()|| (isAr()?'قضية تجريبية جديدة':'New demo matter');const client=$('#newClientName').value.trim()|| (isAr()?'عميل تجريبي':'Demo client');cases.unshift({id:'MD-2026-0'+(42+cases.length),name,client,type:isAr()?'استشارة':'Consultation',status:isAr()?'نشطة':'Active',class:'green',progress:5,next:isAr()?'تحديد الخطوة التالية':'Set next step'});closeModal();toast(isAr()?'تم إنشاء القضية التجريبية.':'Demo matter created.');casesPage()}}
-function eventModal(){openModal(`<h3>${isAr()?'إضافة حدث للتسلسل':'Add a timeline event'}</h3><div class="field"><label>${isAr()?'عنوان الحدث':'Event title'}</label><input id="eventTitle" placeholder="${isAr()?'مثال: اجتماع مع العميل':'Example: Client meeting'}"></div><div class="field"><label>${isAr()?'ملاحظة':'Note'}</label><textarea id="eventNote"></textarea></div><button class="primary full" id="saveEvent">${isAr()?'إضافة الحدث':'Add event'}</button>`);$('#saveEvent').onclick=()=>{closeModal();toast(isAr()?'تمت إضافة الحدث بشكل تجريبي.':'Demo event added.')}}
-function openModal(html){$('#modalContent').innerHTML=html;$('#modal').classList.remove('hidden')}function closeModal(){$('#modal').classList.add('hidden')}
-function render(){applyLang();nav();const pages={dashboard,cases:casesPage,documents,timeline,portal,directory,feedback};pages[state.page]();document.querySelectorAll('[data-page-go]').forEach(b=>b.onclick=()=>{state.page=b.dataset.pageGo;render()})}
-function resetDemo(){if(confirm(isAr()?'سيؤدي ذلك إلى محو تغييراتك المحلية في التجربة. متابعة؟':'This clears local demo changes. Continue?')){localStorage.removeItem('midad-feedbacks');location.reload()}}
-document.querySelectorAll('[data-login]').forEach(b=>b.onclick=()=>{document.querySelectorAll('[data-login]').forEach(x=>x.classList.remove('active'));b.classList.add('active');state.role=b.dataset.login});$('#loginBtn').onclick=()=>{$('#loginView').classList.add('hidden');$('#app').classList.remove('hidden');render()};$('#langLogin').onclick=()=>{state.lang=isAr()?'en':'ar';localStorage.setItem('midad-lang',state.lang);applyLang()};$('#languageToggle').onclick=()=>{state.lang=isAr()?'en':'ar';localStorage.setItem('midad-lang',state.lang);render()};$('#langApp').onclick=$('#languageToggle').onclick;$('#menuBtn').onclick=()=>$('.sidebar').classList.add('open');$('#closeMenu').onclick=()=>$('.sidebar').classList.remove('open');$('#resetBtn').onclick=resetDemo;$('#logoutBtn').onclick=()=>{state.page='dashboard';$('#app').classList.add('hidden');$('#loginView').classList.remove('hidden')};$('#notificationBtn').onclick=()=>toast(isAr()?'لديك إشعاران جديدان في التجربة.':'You have two new demo notifications.');$('#modalClose').onclick=closeModal;$('#modal').onclick=e=>{if(e.target===$('#modal'))closeModal()};applyLang();
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="description" content="MIDAD — منصة قانونية تجريبية للمحامين والعملاء" />
+  <title>MIDAD | مِداد</title>
+
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Noto+Kufi+Arabic:wght@400;500;600;700&display=swap');
+
+    :root {
+      --ink: #102f35;
+      --ink-soft: #17454c;
+      --teal: #08766d;
+      --mint: #dff2ec;
+      --cream: #f7f5ef;
+      --paper: #fffefa;
+      --line: #e5e5dd;
+      --muted: #71807d;
+      --gold: #c69035;
+      --sand: #f3dfbc;
+      --danger: #b9534e;
+      --shadow: 0 18px 50px rgba(16, 47, 53, .10);
+    }
+
+    * { box-sizing: border-box; }
+
+    body {
+      margin: 0;
+      color: var(--ink);
+      background: var(--cream);
+      font: 14px "Noto Kufi Arabic", "DM Sans", sans-serif;
+    }
+
+    button, input, textarea, select { font: inherit; }
+    button { cursor: pointer; }
+    .hidden { display: none !important; }
+
+    .toast {
+      position: fixed;
+      bottom: 24px;
+      left: 24px;
+      z-index: 100;
+      max-width: 330px;
+      color: #fff;
+      background: var(--ink);
+      padding: 13px 18px;
+      border-radius: 9px;
+      font-size: 11px;
+      box-shadow: var(--shadow);
+      opacity: 0;
+      transform: translateY(80px);
+      transition: .25s ease;
+    }
+
+    .toast.show {
+      opacity: 1;
+      transform: translateY(0);
+    }
+
+    .brand {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      color: inherit;
+      text-decoration: none;
+      font-size: 22px;
+      font-weight: 700;
+    }
+
+    .brand-mark {
+      display: grid;
+      place-items: center;
+      width: 37px;
+      height: 37px;
+      border-radius: 11px;
+      color: #fff;
+      background: var(--teal);
+      font-size: 19px;
+    }
+
+    .primary, .secondary {
+      border-radius: 9px;
+      padding: 11px 15px;
+      font-weight: 600;
+      transition: .2s ease;
+    }
+
+    .primary {
+      color: white;
+      background: var(--teal);
+      border: 1px solid var(--teal);
+    }
+
+    .primary:hover {
+      background: #075e57;
+      transform: translateY(-1px);
+    }
+
+    .secondary {
+      color: var(--ink);
+      background: white;
+      border: 1px solid var(--line);
+    }
+
+    .full { width: 100%; }
+
+    /* Login */
+    .login-view {
+      min-height: 100vh;
+      display: grid;
+      grid-template-columns: 1.05fr .95fr;
+      background: var(--paper);
+    }
+
+    .login-art {
+      position: relative;
+      overflow: hidden;
+      color: white;
+      background:
+        radial-gradient(circle at 18% 13%, #d1ad6d 0 5%, #4d8c84 16%, transparent 38%),
+        radial-gradient(circle at 92% 83%, transparent 0 19%, rgba(198, 226, 218, .14) 20% 21%, transparent 22%),
+        linear-gradient(135deg, #112f35, #0f5251);
+    }
+
+    .login-art::after {
+      content: "";
+      position: absolute;
+      inset: 0;
+      background: linear-gradient(135deg, transparent, rgba(0,0,0,.20));
+    }
+
+    .quote {
+      position: absolute;
+      z-index: 1;
+      bottom: 12%;
+      right: 13%;
+      max-width: 440px;
+    }
+
+    .quote .mark {
+      color: #d5a653;
+      font: 110px serif;
+      line-height: .2;
+    }
+
+    .quote p {
+      margin: 16px 0 0;
+      font-size: 25px;
+      font-weight: 500;
+      line-height: 2;
+    }
+
+    .login-card {
+      width: min(450px, 100%);
+      margin: auto;
+      padding: 48px;
+    }
+
+    .eyebrow {
+      margin-top: 68px;
+      color: var(--teal);
+      font-size: 10px;
+      font-weight: 700;
+      letter-spacing: .06em;
+    }
+
+    .login-card h1 {
+      margin: 13px 0;
+      font-size: 29px;
+      line-height: 1.75;
+    }
+
+    .muted {
+      color: var(--muted);
+      line-height: 2;
+    }
+
+    .notice {
+      display: flex;
+      align-items: flex-start;
+      gap: 9px;
+      margin: 24px 0;
+      padding: 12px;
+      border: 1px solid #efd8ad;
+      border-radius: 9px;
+      color: #7c5b2b;
+      background: #fff5e4;
+      font-size: 10px;
+      line-height: 1.9;
+    }
+
+    .account-list {
+      display: grid;
+      gap: 9px;
+    }
+
+    .account {
+      display: flex;
+      align-items: center;
+      gap: 11px;
+      width: 100%;
+      padding: 12px;
+      color: var(--ink);
+      text-align: right;
+      border: 1px solid var(--line);
+      border-radius: 10px;
+      background: transparent;
+    }
+
+    .account.active {
+      border-color: var(--teal);
+      background: #fbfffe;
+      box-shadow: 0 0 0 3px rgba(8,118,109,.10);
+    }
+
+    .account strong, .account small { display: block; }
+    .account small {
+      margin-top: 4px;
+      color: var(--muted);
+      direction: ltr;
+      text-align: right;
+      font-family: "DM Sans", sans-serif;
+      font-size: 10px;
+    }
+
+    .account i {
+      margin-right: auto;
+      color: var(--teal);
+      font-size: 18px;
+      font-style: normal;
+    }
+
+    .avatar {
+      display: grid;
+      place-items: center;
+      flex: none;
+      width: 40px;
+      height: 40px;
+      border-radius: 50%;
+      color: white;
+      background: #16434c;
+      font-weight: 700;
+    }
+
+    .avatar.sand {
+      color: #775222;
+      background: var(--sand);
+    }
+
+    .login-card .primary { margin-top: 17px; }
+    .fine-print { color: var(--muted); font-size: 9px; line-height: 2; }
+    .language { padding: 7px; color: var(--muted); background: transparent; border: 0; font-size: 11px; }
+
+    /* Application */
+    .app { min-height: 100vh; }
+
+    .sidebar {
+      position: fixed;
+      inset: 0 auto 0 0;
+      z-index: 10;
+      display: flex;
+      flex-direction: column;
+      width: 238px;
+      padding: 23px 14px;
+      color: #d8ece9;
+      background: #123940;
+    }
+
+    .sidebar .brand { padding: 0 10px; color: white; }
+    .sidebar .brand-mark { color: var(--ink); background: #d7a64f; }
+
+    .nav {
+      display: grid;
+      gap: 4px;
+      margin-top: 42px;
+    }
+
+    .nav button {
+      display: flex;
+      align-items: center;
+      gap: 11px;
+      width: 100%;
+      padding: 12px;
+      color: #b8cfcc;
+      text-align: right;
+      background: transparent;
+      border: 0;
+      border-radius: 8px;
+      font-size: 12px;
+    }
+
+    .nav button:hover, .nav button.active {
+      color: white;
+      background: rgba(255,255,255,.10);
+    }
+
+    .nav-icon { width: 18px; text-align: center; font-family: Arial, sans-serif; }
+
+    .side-bottom {
+      margin-top: auto;
+      padding: 10px;
+    }
+
+    .demo-mode {
+      margin-bottom: 10px;
+      padding: 9px;
+      border-radius: 7px;
+      color: #f2d08d;
+      background: rgba(223, 176, 84, .12);
+      font-size: 10px;
+    }
+
+    .side-link {
+      width: 100%;
+      padding: 8px 0;
+      color: #b9d0cd;
+      text-align: right;
+      background: transparent;
+      border: 0;
+      font-size: 10px;
+    }
+
+    .side-link.logout { color: #86aaa6; }
+
+    .main {
+      min-height: 100vh;
+      margin-left: 238px;
+    }
+
+    .topbar {
+      position: sticky;
+      top: 0;
+      z-index: 5;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      height: 92px;
+      padding: 18px 48px;
+      border-bottom: 1px solid var(--line);
+      background: rgba(255,254,250,.92);
+      backdrop-filter: blur(12px);
+    }
+
+    .breadcrumb {
+      margin: 0 0 4px;
+      color: var(--muted);
+      font-size: 9px;
+    }
+
+    .topbar h2 {
+      margin: 0;
+      font-size: 19px;
+    }
+
+    .top-actions {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .icon-btn {
+      display: grid;
+      place-items: center;
+      width: 34px;
+      height: 34px;
+      color: var(--ink);
+      background: white;
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      font-size: 17px;
+    }
+
+    .notification { position: relative; }
+    .notification::after {
+      content: "";
+      position: absolute;
+      top: 7px;
+      left: 7px;
+      width: 6px;
+      height: 6px;
+      border-radius: 50%;
+      background: #d96a5a;
+    }
+
+    .content {
+      max-width: 1450px;
+      margin: auto;
+      padding: 34px 48px;
+    }
+
+    .welcome {
+      margin: 0 0 24px;
+      color: var(--muted);
+      font-size: 12px;
+      line-height: 2;
+    }
+
+    .grid {
+      display: grid;
+      grid-template-columns: 1.45fr .9fr;
+      gap: 18px;
+    }
+
+    .card {
+      padding: 20px;
+      border: 1px solid var(--line);
+      border-radius: 12px;
+      background: var(--paper);
+    }
+
+    .card-head {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      margin-bottom: 17px;
+    }
+
+    .card h3 {
+      margin: 0;
+      font-size: 14px;
+    }
+
+    .link-btn {
+      color: var(--teal);
+      background: transparent;
+      border: 0;
+      font-size: 10px;
+    }
+
+    .case-hero {
+      position: relative;
+      overflow: hidden;
+      padding: 24px;
+      border-radius: 12px;
+      color: white;
+      background: linear-gradient(115deg, #123d44, #1b6a63);
+    }
+
+    .case-hero::after {
+      content: "م";
+      position: absolute;
+      bottom: -100px;
+      left: -14px;
+      color: rgba(255,255,255,.06);
+      font-size: 240px;
+      font-weight: 700;
+    }
+
+    .label {
+      color: #bfe0da;
+      font-size: 9px;
+      letter-spacing: .04em;
+    }
+
+    .case-hero h3 {
+      margin: 8px 0 19px;
+      font-size: 18px;
+    }
+
+    .case-meta {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 14px;
+      color: #d5e8e5;
+      font-size: 10px;
+    }
+
+    .progress {
+      height: 5px;
+      overflow: hidden;
+      border-radius: 9px;
+      background: #dfe8e5;
+    }
+
+    .progress span {
+      display: block;
+      height: 100%;
+      border-radius: inherit;
+      background: #d2a04c;
+    }
+
+    .stats {
+      display: grid;
+      grid-template-columns: repeat(3,1fr);
+      gap: 11px;
+      margin-top: 17px;
+    }
+
+    .stat {
+      padding: 13px;
+      border: 1px solid var(--line);
+      border-radius: 9px;
+    }
+
+    .stat strong {
+      display: block;
+      font: 600 21px "DM Sans", sans-serif;
+    }
+
+    .stat span {
+      color: var(--muted);
+      font-size: 9px;
+    }
+
+    .activity {
+      display: grid;
+      gap: 15px;
+    }
+
+    .activity-row {
+      display: grid;
+      grid-template-columns: 29px 1fr;
+      gap: 10px;
+      font-size: 10px;
+      line-height: 1.8;
+    }
+
+    .activity-icon {
+      display: grid;
+      place-items: center;
+      width: 28px;
+      height: 28px;
+      border-radius: 50%;
+      color: var(--teal);
+      background: var(--mint);
+    }
+
+    .activity-row p { margin: 0; }
+    .activity-row time { color: var(--muted); font-size: 9px; }
+
+    .journey { grid-column: 1 / -1; }
+
+    .steps {
+      position: relative;
+      display: flex;
+      justify-content: space-between;
+      margin-top: 25px;
+    }
+
+    .steps::before {
+      content: "";
+      position: absolute;
+      top: 14px;
+      right: 8%;
+      left: 8%;
+      height: 1px;
+      background: var(--line);
+    }
+
+    .step {
+      position: relative;
+      z-index: 1;
+      min-width: 68px;
+      padding: 0 6px;
+      color: var(--muted);
+      text-align: center;
+      background: var(--paper);
+      font-size: 9px;
+    }
+
+    .step i {
+      display: grid;
+      place-items: center;
+      width: 29px;
+      height: 29px;
+      margin: auto auto 7px;
+      color: #95a3a0;
+      background: #edf0ed;
+      border-radius: 50%;
+      font-style: normal;
+    }
+
+    .step.done i { color: white; background: var(--teal); }
+    .step.current i {
+      color: #94621b;
+      background: #f5e3bf;
+      box-shadow: 0 0 0 4px #fbf3e5;
+    }
+
+    .filterbar {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      margin-bottom: 17px;
+      padding: 12px;
+      border: 1px solid var(--line);
+      border-radius: 11px;
+      background: var(--paper);
+    }
+
+    .search {
+      flex: 1;
+      min-width: 150px;
+      padding: 10px 11px;
+      color: var(--ink);
+      background: #f5f5f0;
+      border: 0;
+      border-radius: 7px;
+      outline-color: var(--teal);
+    }
+
+    .select {
+      padding: 9px;
+      color: var(--ink);
+      background: white;
+      border: 1px solid var(--line);
+      border-radius: 7px;
+    }
+
+    .actions {
+      display: flex;
+      justify-content: flex-end;
+      gap: 9px;
+      margin-bottom: 16px;
+    }
+
+    .table-wrap { overflow: auto; padding: 0; }
+
+    table {
+      width: 100%;
+      min-width: 720px;
+      border-collapse: collapse;
+    }
+
+    th {
+      padding: 13px 12px;
+      color: var(--muted);
+      text-align: right;
+      border-bottom: 1px solid var(--line);
+      font-size: 9px;
+      font-weight: 500;
+    }
+
+    td {
+      padding: 16px 12px;
+      border-bottom: 1px solid #f0f0eb;
+      font-size: 11px;
+    }
+
+    .case-name { display: block; font-weight: 700; }
+    .case-ref {
+      display: block;
+      margin-top: 4px;
+      color: var(--muted);
+      font: 9px "DM Sans", sans-serif;
+    }
+
+    .progress-cell {
+      display: grid;
+      grid-template-columns: 1fr 35px;
+      align-items: center;
+      gap: 8px;
+      color: var(--muted);
+      font: 10px "DM Sans", sans-serif;
+    }
+
+    .badge {
+      display: inline-block;
+      padding: 5px 8px;
+      border-radius: 30px;
+      font-size: 9px;
+      white-space: nowrap;
+    }
+
+    .green { color: #187060; background: #def1ea; }
+    .gold { color: #95621b; background: #fff1d5; }
+    .gray { color: #5d6d69; background: #e9edeb; }
+
+    .timeline {
+      position: relative;
+      margin: 8px 12px;
+    }
+
+    .timeline::before {
+      content: "";
+      position: absolute;
+      top: 4px;
+      bottom: 5px;
+      right: 7px;
+      width: 1px;
+      background: #d8dfdc;
+    }
+
+    .timeline-item {
+      position: relative;
+      display: grid;
+      grid-template-columns: 28px 1fr auto;
+      gap: 12px;
+      padding-bottom: 29px;
+    }
+
+    .timeline-dot {
+      z-index: 1;
+      width: 15px;
+      height: 15px;
+      border: 3px solid var(--teal);
+      border-radius: 50%;
+      background: white;
+    }
+
+    .timeline-dot.gold-dot { border-color: var(--gold); }
+    .timeline-dot.gray-dot { border-color: #b6c1be; }
+
+    .timeline-item h4 {
+      margin: 0 0 4px;
+      font-size: 12px;
+    }
+
+    .timeline-item p {
+      margin: 0;
+      color: var(--muted);
+      font-size: 10px;
+      line-height: 1.9;
+    }
+
+    .timeline-date {
+      color: var(--muted);
+      direction: ltr;
+      font: 9px "DM Sans", sans-serif;
+    }
+
+    .upload {
+      margin-bottom: 18px;
+      padding: 29px;
+      color: var(--teal);
+      text-align: center;
+      border: 1.5px dashed #9ec5bf;
+      border-radius: 10px;
+      background: #f8fcfa;
+      font-size: 11px;
+      line-height: 2;
+    }
+
+    .doc-grid, .lawyer-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(205px, 1fr));
+      gap: 12px;
+    }
+
+    .doc, .lawyer-card {
+      padding: 16px;
+      border: 1px solid var(--line);
+      border-radius: 10px;
+      background: var(--paper);
+    }
+
+    .doc-type {
+      color: var(--danger);
+      font: 9px "DM Sans", sans-serif;
+    }
+
+    .doc h4 { margin: 10px 0 5px; font-size: 11px; }
+    .doc small { color: var(--muted); font-size: 9px; }
+
+    .portal-banner {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 15px;
+      margin-bottom: 17px;
+      padding: 18px;
+      border: 1px solid #ead3ad;
+      border-radius: 11px;
+      background: #f6e9d3;
+    }
+
+    .portal-banner p {
+      margin: 5px 0 0;
+      color: #705d3b;
+      font-size: 10px;
+    }
+
+    .copy-btn {
+      padding: 8px;
+      color: var(--ink);
+      background: white;
+      border: 1px solid #d8bd90;
+      border-radius: 7px;
+      font-size: 10px;
+    }
+
+    .profile-head {
+      display: flex;
+      align-items: center;
+      gap: 11px;
+    }
+
+    .profile-head h3 { font-size: 13px; }
+    .profile-head p { margin: 4px 0 0; color: var(--muted); font-size: 9px; }
+
+    .stars {
+      margin: 15px 0 8px;
+      color: #cf9534;
+      font-size: 12px;
+    }
+
+    .profile-stats {
+      display: flex;
+      align-items: end;
+      gap: 14px;
+      padding-top: 12px;
+      border-top: 1px solid var(--line);
+      color: var(--muted);
+      font-size: 9px;
+    }
+
+    .profile-stats b {
+      display: block;
+      color: var(--ink);
+      font: 600 12px "DM Sans", sans-serif;
+    }
+
+    .feedback-layout {
+      display: grid;
+      grid-template-columns: 1.1fr .9fr;
+      gap: 18px;
+    }
+
+    .field { margin: 14px 0; }
+    .field label { display: block; margin-bottom: 7px; font-size: 10px; }
+
+    .field input, .field textarea {
+      width: 100%;
+      padding: 11px;
+      color: var(--ink);
+      background: white;
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      outline-color: var(--teal);
+    }
+
+    .field textarea {
+      min-height: 100px;
+      resize: vertical;
+    }
+
+    .rating { display: flex; direction: ltr; gap: 6px; }
+    .rating button {
+      padding: 0;
+      color: #d5dcda;
+      background: transparent;
+      border: 0;
+      font-size: 27px;
+    }
+
+    .rating button.active { color: #d29a38; }
+
+    .guide {
+      list-style: none;
+      padding: 0;
+      margin: 17px 0;
+      counter-reset: guide;
+    }
+
+    .guide li {
+      position: relative;
+      padding: 0 35px 16px 0;
+      counter-increment: guide;
+      font-size: 10px;
+      line-height: 1.9;
+    }
+
+    .guide li::before {
+      content: counter(guide);
+      position: absolute;
+      right: 0;
+      top: 0;
+      display: grid;
+      place-items: center;
+      width: 22px;
+      height: 22px;
+      color: var(--teal);
+      background: var(--mint);
+      border-radius: 50%;
+      font: 700 10px "DM Sans", sans-serif;
+    }
+
+    .modal {
+      position: fixed;
+      inset: 0;
+      z-index: 50;
+      display: grid;
+      place-items: center;
+      padding: 20px;
+      background: rgba(11, 33, 37, .5);
+    }
+
+    .modal-card {
+      position: relative;
+      width: min(560px, 100%);
+      max-height: 90vh;
+      overflow: auto;
+      padding: 28px;
+      border-radius: 14px;
+      background: var(--paper);
+      box-shadow: 0 25px 70px rgba(0,0,0,.25);
+    }
+
+    .modal-card h3 { margin: 0 0 11px; font-size: 17px; }
+    .modal-card p { color: var(--muted); font-size: 11px; line-height: 2; }
+
+    .close {
+      position: absolute;
+      top: 12px;
+      left: 14px;
+      color: var(--ink);
+      background: transparent;
+      border: 0;
+      font-size: 23px;
+    }
+
+    .mobile-bar { display: none; }
+
+    [dir="ltr"] { font-family: "DM Sans", "Noto Kufi Arabic", sans-serif; }
+    [dir="ltr"] .sidebar { right: auto; left: 0; }
+    [dir="ltr"] .main { margin-right: 0; margin-left: 238px; }
+    [dir="ltr"] .nav button, [dir="ltr"] .side-link, [dir="ltr"] th { text-align: left; }
+    [dir="ltr"] .timeline::before { right: auto; left: 7px; }
+    [dir="ltr"] .guide li { padding: 0 0 16px 35px; }
+    [dir="ltr"] .guide li::before { right: auto; left: 0; }
+
+    @media (max-width: 800px) {
+      .login-view { display: block; }
+      .login-art { display: none; }
+      .login-card { padding: 32px 24px; }
+      .eyebrow { margin-top: 48px; }
+
+      .sidebar {
+        right: 0;
+        left: auto;
+        transform: translateX(100%);
+        transition: .25s ease;
+      }
+
+      .sidebar.open { transform: translateX(0); }
+      [dir="ltr"] .sidebar { right: auto; left: 0; transform: translateX(-100%); }
+      [dir="ltr"] .sidebar.open { transform: translateX(0); }
+
+      .mobile-bar {
+        position: fixed;
+        top: 0;
+        right: 0;
+        left: 0;
+        z-index: 8;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        height: 57px;
+        padding: 9px 14px;
+        border-bottom: 1px solid var(--line);
+        background: var(--paper);
+      }
+
+      .mobile-bar .brand { font-size: 17px; }
+      .mobile-bar .brand-mark { width: 29px; height: 29px; border-radius: 8px; }
+
+      .main, [dir="ltr"] .main {
+        margin: 0;
+        padding-top: 57px;
+      }
+
+      .topbar { height: auto; padding: 18px 20px; }
+      .top-actions .language, .top-actions .avatar { display: none; }
+      .content { padding: 21px 16px; }
+
+      .grid, .feedback-layout { grid-template-columns: 1fr; }
+      .stats { gap: 7px; }
+      .stat { padding: 10px; }
+      .stat strong { font-size: 17px; }
+
+      .steps {
+        overflow-x: auto;
+        justify-content: flex-start;
+        gap: 10px;
+      }
+
+      .step { min-width: 77px; }
+      .filterbar { flex-wrap: wrap; }
+      .search { width: 100%; }
+      .portal-banner { align-items: flex-start; flex-direction: column; }
+      .toast { right: 15px; bottom: 15px; left: 15px; }
+    }
+  </style>
+</head>
+
+<body>
+  <div id="toast" class="toast"></div>
+
+  <section id="loginView" class="login-view">
+    <div class="login-art">
+      <div class="quote">
+        <div class="mark">«</div>
+        <p id="quoteText">حين تكون كل التفاصيل في موضعها، يصبح القرار أوضح.</p>
+      </div>
+    </div>
+
+    <main class="login-card">
+      <a class="brand" href="#">
+        <span class="brand-mark">م</span>
+        <span>مِداد</span>
+      </a>
+
+      <div id="validationLabel" class="eyebrow">نسخة التحقق من الفكرة</div>
+      <h1 id="loginTitle">مساحة عمل قانونية<br>تُشبه طريقة عملك.</h1>
+      <p id="loginSub" class="muted">جرّب رحلة مِداد كاملة ببيانات آمنة ومُحاكية للواقع.</p>
+
+      <div id="demoNotice" class="notice">
+        <span>✦</span>
+        <span>هذه بيئة تجريبية فقط — لا تستخدم بيانات حقيقية.</span>
+      </div>
+
+      <div class="account-list">
+        <button class="account active" data-role="lawyer">
+          <span class="avatar">ن</span>
+          <span>
+            <strong id="lawyerText">محامٍ</strong>
+            <small>noura@midad.demo</small>
+          </span>
+          <i>←</i>
+        </button>
+
+        <button class="account" data-role="client">
+          <span class="avatar sand">ر</span>
+          <span>
+            <strong id="clientText">عميل</strong>
+            <small>rana@midad.demo</small>
+          </span>
+          <i>←</i>
+        </button>
+      </div>
+
+      <button id="loginBtn" class="primary full">دخول التجربة</button>
+      <p id="finePrint" class="fine-print">بالدخول، أنت توافق على أن هذه تجربة استكشافية وليست خدمة قانونية.</p>
+      <button id="languageLogin" class="language">English</button>
+    </main>
+  </section>
+
+  <div id="app" class="app hidden">
+    <aside id="sidebar" class="sidebar">
+      <a class="brand" href="#">
+        <span class="brand-mark">م</span>
+        <span>مِداد</span>
+      </a>
+
+      <nav id="navigation" class="nav"></nav>
+
+      <div class="side-bottom">
+        <div id="demoMode" class="demo-mode">✦ وضع التجربة</div>
+        <button id="resetBtn" class="side-link">↻ إعادة ضبط التجربة</button>
+        <button id="logoutBtn" class="side-link logout">↪ تسجيل الخروج</button>
+      </div>
+    </aside>
+
+    <div class="mobile-bar">
+      <button id="menuBtn" class="icon-btn">☰</button>
+      <a class="brand" href="#"><span class="brand-mark">م</span><span>مِداد</span></a>
+      <button id="languageMobile" class="language">EN</button>
+    </div>
+
+    <main class="main">
+      <header class="topbar">
+        <div>
+          <p id="breadcrumb" class="breadcrumb"></p>
+          <h2 id="pageTitle"></h2>
+        </div>
+
+        <div class="top-actions">
+          <button id="languageApp" class="language">English</button>
+          <button id="notificationsBtn" class="icon-btn notification">♢</button>
+          <span class="avatar" style="width:34px;height:34px;font-size:11px">ن</span>
+        </div>
+      </header>
+
+      <section id="content" class="content"></section>
+    </main>
+  </div>
+
+  <div id="modal" class="modal hidden">
+    <div class="modal-card">
+      <button id="modalClose" class="close">×</button>
+      <div id="modalContent"></div>
+    </div>
+  </div>
+
+  <script>
+    const dictionary = {
+      ar: {
+        dashboard: "الرئيسية",
+        cases: "القضايا",
+        documents: "المستندات",
+        timeline: "التسلسل الزمني",
+        portal: "بوابة العملاء",
+        directory: "دليل المحامين",
+        feedback: "ملاحظاتك",
+        lawyer: "محامٍ",
+        client: "عميل",
+        validation: "نسخة التحقق من الفكرة",
+        loginTitle: "مساحة عمل قانونية<br>تُشبه طريقة عملك.",
+        loginSub: "جرّب رحلة مِداد كاملة ببيانات آمنة ومُحاكية للواقع.",
+        notice: "هذه بيئة تجريبية فقط — لا تستخدم بيانات حقيقية.",
+        enter: "دخول التجربة",
+        fine: "بالدخول، أنت توافق على أن هذه تجربة استكشافية وليست خدمة قانونية.",
+        quote: "حين تكون كل التفاصيل في موضعها، يصبح القرار أوضح.",
+        demo: "✦ وضع التجربة",
+        reset: "↻ إعادة ضبط التجربة",
+        logout: "↪ تسجيل الخروج"
+      },
+      en: {
+        dashboard: "Overview",
+        cases: "Matters",
+        documents: "Documents",
+        timeline: "Timeline",
+        portal: "Client portal",
+        directory: "Lawyer directory",
+        feedback: "Your feedback",
+        lawyer: "Lawyer",
+        client: "Client",
+        validation: "VALIDATION EDITION",
+        loginTitle: "Legal work, organised<br>around how you work.",
+        loginSub: "Explore the Midad journey with safe, realistic demo data.",
+        notice: "This is a demo environment — never enter real data.",
+        enter: "Enter demo",
+        fine: "By entering, you acknowledge this is an exploratory experience, not a legal service.",
+        quote: "When every detail has a place, the decision becomes clearer.",
+        demo: "✦ DEMO MODE",
+        reset: "↻ Reset demo",
+        logout: "↪ Log out"
+      }
+    };
+
+    const demoCases = [
+      {
+        id: "MD-2026-041",
+        name: "شركة الآفاق ضد شركة مدار",
+        client: "شركة الآفاق التجارية",
+        type: "نزاع تجاري",
+        status: "قيد المراجعة",
+        statusEn: "In review",
+        className: "gold",
+        progress: 68,
+        next: "جلسة تحضيرية — 04 ديسمبر",
+        nextEn: "Preliminary hearing — 04 Dec"
+      },
+      {
+        id: "MD-2026-037",
+        name: "طلب تسوية عقد توريد",
+        client: "شركة النور للحلول",
+        type: "عقود تجارية",
+        status: "نشطة",
+        statusEn: "Active",
+        className: "green",
+        progress: 42,
+        next: "مراجعة المسودة — 28 نوفمبر",
+        nextEn: "Draft review — 28 Nov"
+      },
+      {
+        id: "MD-2026-029",
+        name: "علامة «وِفاق» التجارية",
+        client: "مؤسسة وِفاق",
+        type: "ملكية فكرية",
+        status: "بانتظار العميل",
+        statusEn: "Waiting for client",
+        className: "gray",
+        progress: 85,
+        next: "اعتماد المستندات — 25 نوفمبر",
+        nextEn: "Document approval — 25 Nov"
+      }
+    ];
+
+    const lawyers = [
+      ["نورة السالم", "استشارات ونزاعات تجارية", "Commercial disputes & advisory", 12, "4.9", "ن"],
+      ["مشاعل الرشيد", "الملكية الفكرية والتقنية", "Intellectual property & technology", 8, "4.8", "م"],
+      ["عبدالرحمن حمدان", "العقود والحوكمة", "Contracts & governance", 15, "4.9", "ع"],
+      ["لينا العمري", "العمل والموارد البشرية", "Employment & HR", 10, "4.7", "ل"],
+      ["سارة الحربي", "الشركات الناشئة والاستثمار", "Startups & investment", 7, "4.8", "س"],
+      ["عمر القصيبي", "العقار والإنشاءات", "Real estate & construction", 18, "4.6", "ع"]
+    ];
+
+    const state = {
+      lang: localStorage.getItem("midad-lang") || "ar",
+      page: "dashboard",
+      role: "lawyer",
+      rating: 0,
+      cases: [...demoCases]
+    };
+
+    const $ = selector => document.querySelector(selector);
+    const text = key => dictionary[state.lang][key];
+    const isArabic = () => state.lang === "ar";
+
+    function showToast(message) {
+      const toast = $("#toast");
+      toast.textContent = message;
+      toast.classList.add("show");
+      setTimeout(() => toast.classList.remove("show"), 2600);
+    }
+
+    function setLanguage() {
+      const isAr = isArabic();
+      document.documentElement.lang = state.lang;
+      document.documentElement.dir = isAr ? "rtl" : "ltr";
+
+      $("#validationLabel").textContent = text("validation");
+      $("#loginTitle").innerHTML = text("loginTitle");
+      $("#loginSub").textContent = text("loginSub");
+      $("#demoNotice").innerHTML = `<span>✦</span><span>${text("notice")}</span>`;
+      $("#lawyerText").textContent = text("lawyer");
+      $("#clientText").textContent = text("client");
+      $("#loginBtn").textContent = text("enter");
+      $("#finePrint").textContent = text("fine");
+      $("#quoteText").textContent = text("quote");
+      $("#demoMode").textContent = text("demo");
+      $("#resetBtn").textContent = text("reset");
+      $("#logoutBtn").textContent = text("logout");
+      $("#languageLogin").textContent = isAr ? "English" : "العربية";
+      $("#languageApp").textContent = isAr ? "English" : "العربية";
+      $("#languageMobile").textContent = isAr ? "EN" : "ع";
+    }
+
+    function pageLayout(title, breadcrumb, body, actions = "") {
+      $("#pageTitle").textContent = title;
+      $("#breadcrumb").textContent = breadcrumb;
+      $("#content").innerHTML = actions + body;
+    }
+
+    function renderNavigation() {
+      const items = [
+        ["dashboard", "⌂"],
+        ["cases", "▣"],
+        ["documents", "▤"],
+        ["timeline", "◷"],
+        ["portal", "↗"],
+        ["directory", "◎"],
+        ["feedback", "✦"]
+      ];
+
+      $("#navigation").innerHTML = items.map(([page, icon]) => `
+        <button class="${state.page === page ? "active" : ""}" data-page="${page}">
+          <span class="nav-icon">${icon}</span>${text(page)}
+        </button>
+      `).join("");
+
+      document.querySelectorAll("[data-page]").forEach(button => {
+        button.onclick = () => {
+          state.page = button.dataset.page;
+          $("#sidebar").classList.remove("open");
+          render();
+        };
+      });
+    }
+
+    function renderDashboard() {
+      const ar = isArabic();
+
+      pageLayout(
+        text("dashboard"),
+        ar ? "مساحة العمل" : "Workspace",
+        `
+          <p class="welcome">
+            ${ar
+              ? "مرحباً نورة، هذه نظرة سريعة على ما يحتاج انتباهك اليوم."
+              : "Welcome back, Noura. Here is what needs your attention today."}
+          </p>
+
+          <div class="grid">
+            <section class="case-hero">
+              <span class="label">${ar ? "القضية النشطة" : "ACTIVE MATTER"}</span>
+              <h3>شركة الآفاق ضد شركة مدار</h3>
+              <div class="case-meta">
+                <span>${ar ? "نزاع تجاري" : "Commercial dispute"}</span>
+                <span><strong>04 Dec</strong> ${ar ? "الجلسة القادمة" : "next hearing"}</span>
+              </div>
+              <div class="progress" style="margin-top:18px"><span style="width:68%"></span></div>
+            </section>
+
+            <section class="card">
+              <div class="card-head">
+                <h3>${ar ? "النشاط الأخير" : "Recent activity"}</h3>
+                <button class="link-btn" data-go="timeline">${ar ? "عرض الكل" : "View all"}</button>
+              </div>
+
+              <div class="activity">
+                <div class="activity-row">
+                  <div class="activity-icon">↥</div>
+                  <p>${ar ? "أضافت رنا المستند «عرض الأسعار النهائي»" : "Rana added “Final quotation”"}<br><time>${ar ? "منذ ساعتين" : "2 hours ago"}</time></p>
+                </div>
+
+                <div class="activity-row">
+                  <div class="activity-icon">✓</div>
+                  <p>${ar ? "تمت مراجعة مسودة مذكرة الرد" : "Response brief draft reviewed"}<br><time>${ar ? "أمس" : "Yesterday"}</time></p>
+                </div>
+              </div>
+            </section>
+
+            <section class="card">
+              <h3>${ar ? "لمحة عن العمل" : "Work at a glance"}</h3>
+              <div class="stats">
+                <div class="stat"><strong>03</strong><span>${ar ? "قضايا نشطة" : "Active matters"}</span></div>
+                <div class="stat"><strong>07</strong><span>${ar ? "مستندات جديدة" : "New documents"}</span></div>
+                <div class="stat"><strong>02</strong><span>${ar ? "مهام اليوم" : "Tasks today"}</span></div>
+              </div>
+            </section>
+
+            <section class="card">
+              <div class="card-head"><h3>${ar ? "خطوتك التالية" : "Your next move"}</h3></div>
+              <p class="muted" style="font-size:10px">
+                ${ar ? "راجع التسلسل الزمني للقضية قبل الجلسة التحضيرية." : "Review the matter timeline before the preliminary hearing."}
+              </p>
+              <button class="primary" data-go="timeline">${ar ? "فتح التسلسل" : "Open timeline"}</button>
+            </section>
+
+            <section class="card journey">
+              <div class="card-head">
+                <h3>${ar ? "رحلة القضية" : "Matter journey"}</h3>
+                <span class="badge gold">${ar ? "قيد المراجعة" : "In review"}</span>
+              </div>
+
+              <div class="steps">
+                <div class="step done"><i>✓</i>${ar ? "استلام" : "Intake"}</div>
+                <div class="step done"><i>✓</i>${ar ? "تحليل" : "Analysis"}</div>
+                <div class="step current"><i>3</i>${ar ? "تحضير" : "Preparation"}</div>
+                <div class="step"><i>4</i>${ar ? "جلسات" : "Hearings"}</div>
+                <div class="step"><i>5</i>${ar ? "إغلاق" : "Close"}</div>
+              </div>
+            </section>
+          </div>
+        `
+      );
+    }
+
+    function renderCaseRows(cases) {
+      const ar = isArabic();
+
+      $("#caseRows").innerHTML = cases.map(item => `
+        <tr>
+          <td>
+            <span class="case-name">${item.name}</span>
+            <span class="case-ref">${item.id} · ${item.type}</span>
+          </td>
+          <td>${item.client}</td>
+          <td>
+            <div class="progress-cell">
+              <div class="progress"><span style="width:${item.progress}%"></span></div>
+              <span>${item.progress}%</span>
+            </div>
+          </td>
+          <td>${ar ? item.next : item.nextEn}</td>
+          <td><span class="badge ${item.className}">${ar ? item.status : item.statusEn}</span></td>
+          <td><button class="link-btn" data-open-case="${item.id}">···</button></td>
+        </tr>
+      `).join("");
+
+      document.querySelectorAll("[data-open-case]").forEach(button => {
+        button.onclick = () => {
+          state.page = "timeline";
+          render();
+        };
+      });
+    }
+
+    function renderCases() {
+      const ar = isArabic();
+
+      pageLayout(
+        text("cases"),
+        ar ? "مساحة العمل / القضايا" : "Workspace / Matters",
+        `
+          <div class="filterbar">
+            <input id="caseSearch" class="search" placeholder="${ar ? "ابحث باسم القضية أو العميل..." : "Search matter or client..."}">
+            <select id="caseStatus" class="select">
+              <option value="all">${ar ? "كل الحالات" : "All statuses"}</option>
+              <option value="active">${ar ? "نشطة" : "Active"}</option>
+              <option value="review">${ar ? "قيد المراجعة" : "In review"}</option>
+            </select>
+          </div>
+
+          <div class="card table-wrap">
+            <table>
+              <thead>
+                <tr>
+                  <th>${ar ? "القضية" : "MATTER"}</th>
+                  <th>${ar ? "العميل" : "CLIENT"}</th>
+                  <th>${ar ? "التقدم" : "PROGRESS"}</th>
+                  <th>${ar ? "الخطوة التالية" : "NEXT STEP"}</th>
+                  <th>${ar ? "الحالة" : "STATUS"}</th>
+                  <th></th>
+                </tr>
+              </thead>
+              <tbody id="caseRows"></tbody>
+            </table>
+          </div>
+        `,
+        `
+          <div class="actions">
+            <button id="newCaseBtn" class="primary">+ ${ar ? "قضية جديدة" : "New matter"}</button>
+          </div>
+        `
+      );
+
+      renderCaseRows(state.cases);
+
+      function filterCases() {
+        const query = $("#caseSearch").value.toLowerCase();
+        const status = $("#caseStatus").value;
+
+        const filtered = state.cases.filter(item => {
+          const searchable = `${item.name} ${item.client} ${item.type}`.toLowerCase();
+          const matchesText = searchable.includes(query);
+          const matchesStatus =
+            status === "all" ||
+            (status === "active" && item.className === "green") ||
+            (status === "review" && item.className === "gold");
+
+          return matchesText && matchesStatus;
+        });
+
+        renderCaseRows(filtered);
+      }
+
+      $("#caseSearch").oninput = filterCases;
+      $("#caseStatus").onchange = filterCases;
+      $("#newCaseBtn").onclick = openNewCaseModal;
+    }
+
+    function renderDocuments() {
+      const ar = isArabic();
+      const docs = [
+        ["عقد التوريد الأساسي", "PDF", "عقود", "2.4 MB"],
+        ["مذكرة الوقائع", "DOCX", "مذكرات", "836 KB"],
+        ["عرض الأسعار النهائي", "PDF", "مراسلات", "1.2 MB"],
+        ["محضر اجتماع 12 نوفمبر", "PDF", "محاضر", "540 KB"],
+        ["سجل المراسلات", "XLSX", "أدلة", "1.8 MB"],
+        ["مسودة مذكرة الرد", "DOCX", "مذكرات", "690 KB"]
+      ];
+
+      pageLayout(
+        text("documents"),
+        ar ? "القضايا / شركة الآفاق ضد شركة مدار" : "Matters / Al Afaq vs Madar",
+        `
+          <button id="uploadBtn" class="upload">
+            ↑<br>
+            <strong>${ar ? "اسحب ملفاً هنا أو اختر من جهازك" : "Drop a file here or choose from your device"}</strong><br>
+            <small>${ar ? "تُحاكي هذه التجربة رفع الملفات ولا تحفظ أي بيانات." : "This demo simulates file upload and stores no sensitive data."}</small>
+          </button>
+
+          <div class="filterbar">
+            <input id="docSearch" class="search" placeholder="${ar ? "ابحث في المستندات..." : "Search documents..."}">
+          </div>
+
+          <div id="docGrid" class="doc-grid"></div>
+        `
+      );
+
+      function draw(items) {
+        $("#docGrid").innerHTML = items.map(doc => `
+          <article class="doc">
+            <span class="doc-type">${doc[1]}</span>
+            <h4>${doc[0]}</h4>
+            <small>${doc[2]} · ${doc[3]}</small>
+          </article>
+        `).join("");
+      }
+
+      draw(docs);
+
+      $("#docSearch").oninput = event => {
+        draw(docs.filter(doc => doc[0].includes(event.target.value)));
+      };
+
+      $("#uploadBtn").onclick = () => {
+        showToast(ar ? "تمت محاكاة رفع المستند بنجاح." : "Document upload simulated successfully.");
+      };
+    }
+
+    function renderTimeline() {
+      const ar = isArabic();
+
+      pageLayout(
+        text("timeline"),
+        ar ? "القضايا / شركة الآفاق ضد شركة مدار" : "Matters / Al Afaq vs Madar",
+        `
+          <section class="card">
+            <div class="card-head">
+              <div>
+                <h3>شركة الآفاق ضد شركة مدار</h3>
+                <span class="case-ref">MD-2026-041 · ${ar ? "نزاع تجاري" : "Commercial dispute"}</span>
+              </div>
+              <button id="addEventBtn" class="primary">+ ${ar ? "إضافة حدث" : "Add event"}</button>
+            </div>
+
+            <div class="timeline">
+              <article class="timeline-item">
+                <i class="timeline-dot gold-dot"></i>
+                <div>
+                  <h4>${ar ? "جلسة تحضيرية قادمة" : "Preliminary hearing scheduled"}</h4>
+                  <p>${ar ? "جلسة عن بُعد لمناقشة نطاق النزاع والمستندات المطلوبة." : "Remote hearing to discuss scope and requested documents."}</p>
+                </div>
+                <time class="timeline-date">04 DEC 2026</time>
+              </article>
+
+              <article class="timeline-item">
+                <i class="timeline-dot"></i>
+                <div>
+                  <h4>${ar ? "تمت مراجعة مسودة مذكرة الرد" : "Response brief draft reviewed"}</h4>
+                  <p>${ar ? "تمت إضافة ملاحظات داخلية وإرسال الطلب لاعتماد العميل." : "Internal comments added; approval requested from client."}</p>
+                </div>
+                <time class="timeline-date">18 NOV 2026</time>
+              </article>
+
+              <article class="timeline-item">
+                <i class="timeline-dot"></i>
+                <div>
+                  <h4>${ar ? "استلام عرض الأسعار النهائي" : "Final quotation received"}</h4>
+                  <p>${ar ? "أضافت رنا المستند عبر بوابة العميل." : "Rana added the document through the client portal."}</p>
+                </div>
+                <time class="timeline-date">16 NOV 2026</time>
+              </article>
+
+              <article class="timeline-item">
+                <i class="timeline-dot gray-dot"></i>
+                <div>
+                  <h4>${ar ? "افتتاح القضية" : "Matter opened"}</h4>
+                  <p>${ar ? "تم إنشاء مساحة العمل وتحديد فريق القضية." : "Workspace created and matter team assigned."}</p>
+                </div>
+                <time class="timeline-date">08 NOV 2026</time>
+              </article>
+            </div>
+          </section>
+        `
+      );
+
+      $("#addEventBtn").onclick = openEventModal;
+    }
+
+    function renderPortal() {
+      const ar = isArabic();
+
+      pageLayout(
+        text("portal"),
+        ar ? "التواصل / بوابة العملاء" : "Communication / Client portal",
+        `
+          <div class="portal-banner">
+            <div>
+              <strong>${ar ? "بوابة عميل آمنة وبسيطة" : "A simple, secure client portal"}</strong>
+              <p>${ar ? "شارك رابطاً تجريبياً يتيح للعميل متابعة التقدم وإضافة المستندات." : "Share a demo link for clients to follow progress and add documents."}</p>
+            </div>
+            <button id="copyPortalBtn" class="copy-btn">${ar ? "نسخ رابط التجربة" : "Copy demo link"}</button>
+          </div>
+
+          <div class="grid">
+            <section class="card">
+              <div class="card-head">
+                <h3>${ar ? "ما يراه العميل" : "What the client sees"}</h3>
+                <span class="badge green">${ar ? "نشط" : "Active"}</span>
+              </div>
+
+              <div class="case-hero">
+                <span class="label">MD-2026-041</span>
+                <h3>شركة الآفاق ضد شركة مدار</h3>
+                <div class="case-meta"><span>${ar ? "آخر تحديث: اليوم" : "Last update: today"}</span></div>
+              </div>
+
+              <div class="activity" style="margin-top:20px">
+                <div class="activity-row">
+                  <div class="activity-icon">✓</div>
+                  <p>${ar ? "تمت مراجعة مسودة مذكرة الرد" : "Response brief draft reviewed"}</p>
+                </div>
+                <div class="activity-row">
+                  <div class="activity-icon">↥</div>
+                  <p>${ar ? "نحتاج منك اعتماد مسودة المذكرة" : "Your approval is needed on the brief draft"}</p>
+                </div>
+              </div>
+            </section>
+
+            <section class="card">
+              <h3>${ar ? "دعوة العميل" : "Client invitation"}</h3>
+              <p class="muted" style="font-size:10px">${ar ? "رنا الهادي — عميل تجريبي" : "Rana Al-Hadi — demo client"}</p>
+
+              <div class="field">
+                <label>${ar ? "البريد الإلكتروني" : "Email"}</label>
+                <input value="rana@midad.demo" readonly>
+              </div>
+
+              <button id="inviteBtn" class="primary full">${ar ? "إرسال دعوة تجريبية" : "Send demo invitation"}</button>
+            </section>
+          </div>
+        `
+      );
+
+      $("#copyPortalBtn").onclick = async () => {
+        try {
+          await navigator.clipboard.writeText("https://demo.midad.app/portal/MD-2026-041");
+        } catch (_) {}
+        showToast(ar ? "تم نسخ رابط تجريبي." : "Demo link copied.");
+      };
+
+      $("#inviteBtn").onclick = () => {
+        showToast(ar ? "أُرسلت الدعوة بشكل تجريبي." : "Demo invitation sent.");
+      };
+    }
+
+    function renderDirectory() {
+      const ar = isArabic();
+
+      pageLayout(
+        text("directory"),
+        ar ? "اكتشف / دليل المحامين" : "Discover / Lawyer directory",
+        `
+          <p class="welcome">
+            ${ar
+              ? "ملفات مهنية تجريبية تساعدك على تصور شبكة مِداد المستقبلية."
+              : "Demo professional profiles to help imagine the future Midad network."}
+          </p>
+
+          <div class="filterbar">
+            <input id="lawyerSearch" class="search" placeholder="${ar ? "ابحث بالاسم أو التخصص..." : "Search by name or specialty..."}">
+          </div>
+
+          <div id="lawyerGrid" class="lawyer-grid"></div>
+        `
+      );
+
+      function draw(items) {
+        $("#lawyerGrid").innerHTML = items.map((lawyer, index) => `
+          <article class="lawyer-card">
+            <div class="profile-head">
+              <span class="avatar ${index % 2 ? "sand" : ""}">${lawyer[5]}</span>
+              <div>
+                <h3>${lawyer[0]}</h3>
+                <p>${ar ? lawyer[1] : lawyer[2]}</p>
+              </div>
+            </div>
+
+            <div class="stars">★★★★★ <span style="color:var(--muted);font-size:10px">${lawyer[4]}</span></div>
+
+            <div class="profile-stats">
+              <span><b>${lawyer[3]}</b>${ar ? "سنة خبرة" : "years"}</span>
+              <span><b>${18 + index * 7}</b>${ar ? "تقييم" : "reviews"}</span>
+              <button class="link-btn" data-profile="${index}">${ar ? "عرض الملف" : "View profile"}</button>
+            </div>
+          </article>
+        `).join("");
+
+        document.querySelectorAll("[data-profile]").forEach(button => {
+          button.onclick = () => openProfileModal(lawyers[button.dataset.profile]);
+        });
+      }
+
+      draw(lawyers);
+
+      $("#lawyerSearch").oninput = event => {
+        const query = event.target.value.toLowerCase();
+        draw(lawyers.filter(lawyer => `${lawyer[0]} ${lawyer[1]} ${lawyer[2]}`.toLowerCase().includes(query)));
+      };
+    }
+
+    function renderFeedback() {
+      const ar = isArabic();
+
+      pageLayout(
+        text("feedback"),
+        ar ? "المساعدة / ملاحظاتك" : "Help / Your feedback",
+        `
+          <div class="feedback-layout">
+            <section class="card">
+              <h3>${ar ? "كيف كانت تجربة مِداد؟" : "How was your Midad experience?"}</h3>
+              <p class="muted" style="font-size:10px">
+                ${ar
+                  ? "رأيك سيشكل ما نبنيه لاحقاً. لا تُدرج معلومات حساسة أو خاصة."
+                  : "Your perspective shapes what we build next. Please do not include sensitive information."}
+              </p>
+
+              <div class="field">
+                <label>${ar ? "تقييمك العام" : "Overall rating"}</label>
+                <div id="rating" class="rating">
+                  ${[1,2,3,4,5].map(number => `
+                    <button data-rate="${number}" class="${state.rating >= number ? "active" : ""}">★</button>
+                  `).join("")}
+                </div>
+              </div>
+
+              <div class="field">
+                <label>${ar ? "ما الذي كان مفيداً؟ وما الذي تود تغييره؟" : "What felt useful? What would you change?"}</label>
+                <textarea id="feedbackText" placeholder="${ar ? "اكتب ملاحظاتك هنا..." : "Write your thoughts here..."}"></textarea>
+              </div>
+
+              <button id="submitFeedbackBtn" class="primary">${ar ? "إرسال الملاحظات" : "Send feedback"}</button>
+            </section>
+
+            <aside class="card">
+              <h3>${ar ? "دليل سريع للتجربة" : "Quick exploration guide"}</h3>
+              <ol class="guide">
+                <li>${ar ? "ابدأ بلوحة التحكم وتعرّف على القضية النشطة." : "Start at the overview and inspect the active matter."}</li>
+                <li>${ar ? "افتح التسلسل الزمني لترى سياق القرارات." : "Open the timeline to see decision context."}</li>
+                <li>${ar ? "جرّب بوابة العميل من منظور التواصل." : "Try the client portal communication flow."}</li>
+                <li>${ar ? "استكشف دليل المحامين والملفات المهنية." : "Explore the directory and profiles."}</li>
+              </ol>
+
+              <div class="notice">
+                <span>✦</span>
+                <span>${ar ? "يمكنك إعادة ضبط التجربة في أي وقت من القائمة." : "You can reset the demo anytime from the menu."}</span>
+              </div>
+            </aside>
+          </div>
+        `
+      );
+
+      document.querySelectorAll("[data-rate]").forEach(button => {
+        button.onclick = () => {
+          state.rating = Number(button.dataset.rate);
+          renderFeedback();
+        };
+      });
+
+      $("#submitFeedbackBtn").onclick = () => {
+        const feedback = $("#feedbackText").value.trim();
+
+        if (!state.rating && !feedback) {
+          showToast(ar ? "أضف تقييماً أو ملاحظة أولاً." : "Please add a rating or note first.");
+          return;
+        }
+
+        const feedbackItems = JSON.parse(localStorage.getItem("midad-feedback") || "[]");
+        feedbackItems.push({
+          rating: state.rating,
+          feedback,
+          createdAt: new Date().toISOString()
+        });
+
+        localStorage.setItem("midad-feedback", JSON.stringify(feedbackItems));
+        state.rating = 0;
+
+        showToast(ar ? "شكراً — تم حفظ ملاحظتك في هذه التجربة." : "Thank you — your feedback was saved in this demo.");
+        renderFeedback();
+      };
+    }
+
+    function openModal(html) {
+      $("#modalContent").innerHTML = html;
+      $("#modal").classList.remove("hidden");
+    }
+
+    function closeModal() {
+      $("#modal").classList.add("hidden");
+    }
+
+    function openNewCaseModal() {
+      const ar = isArabic();
+
+      openModal(`
+        <h3>${ar ? "إنشاء قضية تجريبية" : "Create demo matter"}</h3>
+        <p>${ar ? "أضف قضية افتراضية لترى كيف تظهر ضمن مساحة العمل." : "Add a fictional matter to see how it appears in the workspace."}</p>
+
+        <div class="field">
+          <label>${ar ? "اسم القضية" : "Matter name"}</label>
+          <input id="newCaseName" placeholder="${ar ? "مثال: عقد شراكة افتراضي" : "Example: Fictional partnership agreement"}">
+        </div>
+
+        <div class="field">
+          <label>${ar ? "اسم العميل" : "Client name"}</label>
+          <input id="newClientName" placeholder="${ar ? "شركة تجريبية" : "Demo company"}">
+        </div>
+
+        <button id="saveCaseBtn" class="primary full">${ar ? "إنشاء القضية" : "Create matter"}</button>
+      `);
+
+      $("#saveCaseBtn").onclick = () => {
+        const name = $("#newCaseName").value.trim() || (ar ? "قضية تجريبية جديدة" : "New demo matter");
+        const client = $("#newClientName").value.trim() || (ar ? "عميل تجريبي" : "Demo client");
+
+        state.cases.unshift({
+          id: `MD-2026-0${42 + state.cases.length}`,
+          name,
+          client,
+          type: ar ? "استشارة" : "Consultation",
+          status: ar ? "نشطة" : "Active",
+          statusEn: "Active",
+          className: "green",
+          progress: 5,
+          next: ar ? "تحديد الخطوة التالية" : "Set next step",
+          nextEn: "Set next step"
+        });
+
+        closeModal();
+        showToast(ar ? "تم إنشاء القضية التجريبية." : "Demo matter created.");
+        renderCases();
+      };
+    }
+
+    function openEventModal() {
+      const ar = isArabic();
+
+      openModal(`
+        <h3>${ar ? "إضافة حدث للتسلسل" : "Add a timeline event"}</h3>
+
+        <div class="field">
+          <label>${ar ? "عنوان الحدث" : "Event title"}</label>
+          <input id="eventTitle" placeholder="${ar ? "مثال: اجتماع مع العميل" : "Example: Client meeting"}">
+        </div>
+
+        <div class="field">
+          <label>${ar ? "ملاحظة" : "Note"}</label>
+          <textarea id="eventNote"></textarea>
+        </div>
+
+        <button id="saveEventBtn" class="primary full">${ar ? "إضافة الحدث" : "Add event"}</button>
+      `);
+
+      $("#saveEventBtn").onclick = () => {
+        closeModal();
+        showToast(ar ? "تمت إضافة الحدث بشكل تجريبي." : "Demo event added.");
+      };
+    }
+
+    function openProfileModal(lawyer) {
+      const ar = isArabic();
+
+      openModal(`
+        <h3>${lawyer[0]}</h3>
+        <p>${ar ? lawyer[1] : lawyer[2]} · ${lawyer[3]} ${ar ? "سنة من الخبرة" : "years of experience"}</p>
+        <div class="stars">★★★★★ ${lawyer[4]}</div>
+        <p>
+          ${ar
+            ? "ملف مهني تجريبي يعرض كيف يستطيع العملاء استكشاف الخبرات والمجالات القانونية ضمن مِداد."
+            : "A demo professional profile showing how clients can explore expertise and legal practices in Midad."}
+        </p>
+        <button id="contactLawyerBtn" class="primary full">${ar ? "طلب تواصل تجريبي" : "Request a demo contact"}</button>
+      `);
+
+      $("#contactLawyerBtn").onclick = () => {
+        closeModal();
+        showToast(ar ? "تم تسجيل اهتمامك بشكل تجريبي." : "Your demo interest was recorded.");
+      };
+    }
+
+    function render() {
+      setLanguage();
+      renderNavigation();
+
+      const pages = {
+        dashboard: renderDashboard,
+        cases: renderCases,
+        documents: renderDocuments,
+        timeline: renderTimeline,
+        portal: renderPortal,
+        directory: renderDirectory,
+        feedback: renderFeedback
+      };
+
+      pages[state.page]();
+
+      document.querySelectorAll("[data-go]").forEach(button => {
+        button.onclick = () => {
+          state.page = button.dataset.go;
+          render();
+        };
+      });
+    }
+
+    function toggleLanguage() {
+      state.lang = isArabic() ? "en" : "ar";
+      localStorage.setItem("midad-lang", state.lang);
+      render();
+    }
+
+    function resetDemo() {
+      const ar = isArabic();
+      const approved = confirm(
+        ar
+          ? "سيؤدي ذلك إلى مسح التغييرات المحلية في التجربة. هل تريد المتابعة؟"
+          : "This clears local demo changes. Do you want to continue?"
+      );
+
+      if (!approved) return;
+
+      localStorage.removeItem("midad-feedback");
+      location.reload();
+    }
+
+    document.querySelectorAll("[data-role]").forEach(button => {
+      button.onclick = () => {
+        document.querySelectorAll("[data-role]").forEach(item => item.classList.remove("active"));
+        button.classList.add("active");
+        state.role = button.dataset.role;
+      };
+    });
+
+    $("#loginBtn").onclick = () => {
+      $("#loginView").classList.add("hidden");
+      $("#app").classList.remove("hidden");
+      render();
+    };
+
+    $("#languageLogin").onclick = toggleLanguage;
+    $("#languageApp").onclick = toggleLanguage;
+    $("#languageMobile").onclick = toggleLanguage;
+
+    $("#menuBtn").onclick = () => $("#sidebar").classList.add("open");
+
+    $("#notificationsBtn").onclick = () => {
+      showToast(isArabic() ? "لديك إشعاران جديدان في التجربة." : "You have two new demo notifications.");
+    };
+
+    $("#resetBtn").onclick = resetDemo;
+
+    $("#logoutBtn").onclick = () => {
+      state.page = "dashboard";
+      $("#app").classList.add("hidden");
+      $("#loginView").classList.remove("hidden");
+    };
+
+    $("#modalClose").onclick = closeModal;
+
+    $("#modal").onclick = event => {
+      if (event.target === $("#modal")) closeModal();
+    };
+
+    setLanguage();
+  </script>
+</body>
+</html>
